@@ -41,14 +41,15 @@ export function BrewVisual({ coffeeGrams, waterGrams }: BrewVisualProps) {
   const { invertColors } = useInvertColors();
   const fg = invertColors ? "black" : "white";
 
-  const scoopValue = coffeeGrams / GRAMS_PER_SCOOP;
-  const scoops = quarterLabel(scoopValue);
-  const scoopUnit = scoopValue === 1 ? "scoop" : "scoops";
-  const chamberTarget = halfLabel(waterGrams / ML_PER_CHAMBER_NUMBER);
-  const fillFraction = Math.min(
-    waterGrams / (ML_PER_CHAMBER_NUMBER * CHAMBER_NUMBERS.length),
-    1
-  );
+  const chamberCapacity = ML_PER_CHAMBER_NUMBER * CHAMBER_NUMBERS.length;
+  const scoops = quarterLabel(coffeeGrams / GRAMS_PER_SCOOP);
+  const scoopUnit = scoops === "1" ? "scoop" : "scoops";
+  // The chamber is only numbered to ④, so a larger brew can't name a mark.
+  const overCapacity = waterGrams > chamberCapacity;
+  const chamberTarget = overCapacity
+    ? "the top"
+    : halfLabel(waterGrams / ML_PER_CHAMBER_NUMBER);
+  const fillFraction = Math.min(waterGrams / chamberCapacity, 1);
 
   return (
     <View style={styles.container}>
