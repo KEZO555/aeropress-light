@@ -184,29 +184,26 @@ export default function RecipeScreen() {
               ) : null}
               <Spec label="C40 clicks" value={`${recipe.c40Clicks}`} />
             </View>
-            {recipe.method === "aeropress" ? (
-              <>
-                <HapticPressable
-                  onPress={() => setShowNoScale((value) => !value)}
-                  style={[styles.row, styles.toggle]}
-                >
-                  <StyledText style={styles.sectionTitle}>
-                    Without a scale
-                  </StyledText>
-                  <StyledText style={styles.toggleHint}>
-                    {showNoScale ? "Hide" : "Show"}
-                  </StyledText>
-                </HapticPressable>
-                <View style={styles.row}>
-                  {showNoScale ? (
-                    <BrewVisual
-                      coffeeGrams={recipe.coffeeGrams}
-                      waterGrams={recipe.waterGrams}
-                    />
-                  ) : null}
-                </View>
-              </>
-            ) : null}
+            <HapticPressable
+              onPress={() => setShowNoScale((value) => !value)}
+              style={[styles.row, styles.toggle]}
+            >
+              <StyledText style={styles.sectionTitle}>
+                Without a scale
+              </StyledText>
+              <StyledText style={styles.toggleHint}>
+                {showNoScale ? "Hide" : "Show"}
+              </StyledText>
+            </HapticPressable>
+            <View style={styles.row}>
+              {showNoScale ? (
+                <BrewVisual
+                  coffeeGrams={recipe.coffeeGrams}
+                  method={recipe.method}
+                  waterGrams={recipe.waterGrams}
+                />
+              ) : null}
+            </View>
             <StyledText style={[styles.row, styles.sectionTitle]}>
               Steps
             </StyledText>

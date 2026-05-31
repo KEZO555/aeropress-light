@@ -1122,22 +1122,23 @@ export interface Category {
   blurb: string;
   id: string;
   match: (recipe: Recipe) => boolean;
+  // The brew method this browse category belongs to. Categories are grouped
+  // under per-method tabs on the recipes screen.
+  method: BrewMethod;
   name: string;
 }
 
-export const categories: Category[] = [
-  {
-    id: "aeropress",
-    name: "AeroPress",
-    blurb: "Every AeroPress recipe",
-    match: (recipe) => recipe.method === "aeropress",
-  },
-  {
-    id: "pour-over",
-    name: "Pour over",
-    blurb: "V60 pour-over recipes",
-    match: (recipe) => recipe.method === "v60",
-  },
+// Cross-method browse facets. For each method we surface an "All" category
+// plus any of these facets that actually match at least one recipe, so empty
+// combinations (e.g. an espresso-sized V60) never appear.
+interface BrowseFacet {
+  blurb: string;
+  id: string;
+  match: (recipe: Recipe) => boolean;
+  name: string;
+}
+
+const BROWSE_FACETS: BrowseFacet[] = [
   {
     id: "espresso-short",
     name: "Espresso & short",
@@ -1175,13 +1176,43 @@ export const categories: Category[] = [
     blurb: "Delicate, fruity light roasts",
     match: (recipe) => recipe.roast === "light",
   },
-  {
-    id: "all",
-    name: "Browse all",
-    blurb: "Every recipe",
-    match: () => true,
-  },
 ];
+
+export const BROWSE_METHODS: BrewMethod[] = ["aeropress", "v60"];
+
+function buildCategories(): Category[] {
+  const result: Category[] = [];
+  for (const method of BROWSE_METHODS) {
+    const label = METHOD_LABELS[method];
+    result.push({
+      id: `all-${method}`,
+      name: `All ${label}`,
+      blurb: `Every ${label} recipe`,
+      method,
+      match: (recipe) => recipe.method === method,
+    });
+    for (const facet of BROWSE_FACETS) {
+      const match = (recipe: Recipe) =>
+        recipe.method === method && facet.match(recipe);
+      if (recipes.some(match)) {
+        result.push({
+          id: `${method}-${facet.id}`,
+          name: facet.name,
+          blurb: facet.blurb,
+          method,
+          match,
+        });
+      }
+    }
+  }
+  return result;
+}
+
+export const categories: Category[] = buildCategories();
+
+export function categoriesForMethod(method: BrewMethod): Category[] {
+  return categories.filter((category) => category.method === method);
+}
 
 export function getCategory(id: string): Category | undefined {
   return categories.find((category) => category.id === id);
